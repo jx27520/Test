@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Bioheng Biotech · Patent Intelligence Dashboard</title>
+    <!-- Google Font + ECharts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f7fb;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 2rem 2rem 3rem;
+            color: #1e293b;
+        }
+
+        .dashboard {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* Hero section */
+        .hero {
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1a3c5c, #0f5c6b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .hero p {
+            font-size: 0.9rem;
+            color: #5b6e8c;
+            border-left: 3px solid #2b7e6b;
+            padding-left: 1rem;
+            margin-top: 0.5rem;
+            font-weight: 450;
+        }
+
+        /* KPI cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .kpi-card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 1.3rem 0.8rem;
+            text-align: center;
+            box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            border: 1px solid #eef2f6;
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.08);
+        }
+        .kpi-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f3f4d;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .kpi-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            color: #5b6e8c;
+            margin-top: 8px;
+        }
+        .kpi-sub {
+            font-size: 0.7rem;
+            color: #8192aa;
+            margin-top: 6px;
+        }
+        .active-highlight {
+            background: linear-gradient(135deg, #f0f9f6, #ffffff);
+            border-left: 4px solid #2b7e6b;
+        }
+
+        /* Card styling */
+        .card {
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0,0,0,0.03);
+            padding: 1.5rem 1.3rem;
+            transition: all 0.2s;
+            border: 1px solid #edf2f7;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 4px solid #2b7e6b;
+            padding-left: 14px;
+            color: #1e2f41;
+            letter-spacing: -0.2px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 280px;
+            flex-shrink: 0;
+        }
+        .small-chart {
+            height: 220px;
+        }
+        .inline-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+        .stat-badge {
+            background: #f1f5f9;
+            border-radius: 40px;
+            padding: 0.3rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #1e4a6e;
+        }
+
+        /* Grid layouts */
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.8rem;
+            margin-bottom: 1.8rem;
+        }
+        .grid-3col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.8rem;
+            margin-bottom: 1.8rem;
+        }
+        
+        /* Patent showcase block */
+        .patent-showcase {
+            background: #ffffff;
+            border-radius: 28px;
+            margin-bottom: 1.8rem;
+            border: 1px solid #edf2f7;
+            overflow: hidden;
+        }
+        .patent-inner {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0;
+        }
+        .patent-list {
+            flex: 1.2;
+            padding: 1.5rem;
+            background: #fefefe;
+        }
+        .patent-highlight {
+            flex: 2;
+            background: #f8fafd;
+            padding: 1.5rem;
+            border-left: 1px solid #eef2f8;
+        }
+        .patent-item {
+            border-bottom: 1px solid #eff3f8;
+            padding: 1rem 0;
+        }
+        .patent-item:last-child {
+            border-bottom: none;
+        }
+        .patent-item strong {
+            font-weight: 700;
+            color: #165a4b;
+        }
+        .full-chain {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0c4e5c;
+        }
+        
+        /* Strategy footer */
+        .strategy-footer {
+            background: #eef3fc;
+            border-radius: 24px;
+            padding: 1.3rem 1.8rem;
+            margin-top: 0.5rem;
+            border-left: 5px solid #2b7e6b;
+        }
+        .strategy-footer ul {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            list-style: none;
+            margin-top: 0.8rem;
+        }
+        .strategy-footer li {
+            flex: 1;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1f4662;
+        }
+        hr {
+            margin: 0.5rem 0;
+            border: 0;
+            height: 1px;
+            background: #e9edf2;
+        }
+        .legend-note {
+            font-size: 0.7rem;
+            color: #7e8b9f;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        @media (max-width: 900px) {
+            body {
+                padding: 1.2rem;
+            }
+            .grid-2col, .grid-3col {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+            }
+            .patent-inner {
+                flex-direction: column;
+            }
+            .patent-highlight {
+                border-left: none;
+                border-top: 1px solid #eef2f8;
+            }
+        }
+        .badge-icon {
+            font-size: 0.9rem;
+        }
+        .text-accent {
+            color: #2b7e6b;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <div class="hero">
+        <h1>🧬 Bioheng · Patent Asset Dashboard</h1>
+        <p>Analysis based on 216 unique patent families (de-duplicated) | Immune cell therapy, CAR-T, antibodies & gene editing platforms | Data through 2025 + Q1 2026 key grants</p>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-number">216</div>
+            <div class="kpi-label">Total Patent Filings</div>
+            <div class="kpi-sub">Unique families</div>
+        </div>
+        <div class="kpi-card active-highlight">
+            <div class="kpi-number">124</div>
+            <div class="kpi-label">Active Patent Families</div>
+            <div class="kpi-sub">87 under exam + 37 granted</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-number">62.9</div>
+            <div class="kpi-label">Avg. Claims / Patent</div>
+            <div class="kpi-sub">Median 100 · High-value layout</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-number">62%</div>
+            <div class="kpi-label">Patents >50 Claims</div>
+            <div class="kpi-sub">Broad protection scope</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-number">66.7%</div>
+            <div class="kpi-label">Overseas Filings</div>
+            <div class="kpi-sub">144 direct foreign filings</div>
+        </div>
+    </div>
+
+    <!-- Row 1: Annual trend + Legal status -->
+    <div class="grid-2col">
+        <div class="card">
+            <div class="card-title">📈 Annual Filing Trend (2017–2025)</div>
+            <div id="trendChart" class="chart-container"></div>
+            <div class="legend-note">Peak of 73 applications in 2021 (33.8% of total). Steady R&D output during 2022–2024.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">⚖️ Legal Status · Portfolio Health</div>
+            <div id="legalChart" class="chart-container"></div>
+            <div class="inline-stats">
+                <span class="stat-badge">✅ Granted 37 (17.1%)</span>
+                <span class="stat-badge">🔍 Under Exam 87 (40.3%)</span>
+                <span class="stat-badge">📉 Invalid/Rejected 8.3%</span>
+                <span class="stat-badge">🔥 Active patents 57.4%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Tech focus + Product correlation -->
+    <div class="grid-2col">
+        <div class="card">
+            <div class="card-title">🧪 Core Technology Landscape</div>
+            <div id="techChart" class="chart-container"></div>
+            <div class="legend-note">Immune cell + CAR-T therapies account for 38.4%; synergy with antibodies & gene editing.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">🔗 Product Pipeline Correlation</div>
+            <div id="productChart" class="chart-container"></div>
+            <div class="legend-note">Platform/general tech 87%; CTD402 (CD7 UCAR-T) covered by 11 patents.</div>
+        </div>
+    </div>
+
+    <!-- Row 3: Global strategy + Claim quality -->
+    <div class="grid-2col">
+        <div class="card">
+            <div class="card-title">🌍 Global IP Strategy</div>
+            <div id="globalChart" style="height: 240px; width: 100%;"></div>
+            <div class="flex-between" style="margin-top: 0.8rem; gap: 10px; flex-wrap: wrap;">
+                <span class="stat-badge">✈️ Direct overseas 144 (66.7%)</span>
+                <span class="stat-badge">🌐 PCT applications 72 (33.3%)</span>
+            </div>
+            <div class="legend-note">High overseas ratio reflects global commercial ambition; PCT paves the way for multi‑national entry.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📝 Patent Quality · Claim Analysis</div>
+            <div id="claimsChart" style="height: 210px; width: 100%;"></div>
+            <div style="background: #f8fafc; border-radius: 24px; padding: 1rem; margin-top: 0.5rem;">
+                <div class="flex-between"><span class="badge-icon">📊 Average claims</span><strong style="font-size: 1.6rem;">62.9</strong></div>
+                <div class="flex-between" style="margin-top: 8px;"><span>🎯 Median claims</span><strong style="font-size: 1.4rem;">100</strong></div>
+                <div class="flex-between" style="margin-top: 8px;"><span>🏆 Patents with >50 claims</span><strong class="text-accent">62.04%</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technology Moat & Q1 2026 Key Patents (English) -->
+    <div class="patent-showcase">
+        <div class="patent-inner">
+            <div class="patent-list">
+                <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.8rem;">🚀 Q1 2026 Core Patent Assets</div>
+                <div class="patent-item">
+                    <strong>🔬 Anti‑Claudin18.2 nanobody</strong><br>
+                    <span style="font-size: 0.8rem;">Granted: Mar 20, 2026 · CN115403671B</span>
+                </div>
+                <div class="patent-item">
+                    <strong>🧬 CD30 & BCMA engineered immune cells</strong><br>
+                    <span style="font-size: 0.8rem;">Granted: Mar 17, 2026 · CN115491359B</span>
+                </div>
+                <div class="patent-item">
+                    <strong>⚙️ CAR with novel costimulatory domain</strong><br>
+                    <span style="font-size: 0.8rem;">Published: Jan 27, 2026 · CN121419997A</span>
+                </div>
+            </div>
+            <div class="patent-highlight">
+                <div class="full-chain">✨ Full‑chain coverage · Sustainable technology moat</div>
+                <p style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.7rem;">From target discovery, molecular design to manufacturing processes – Bioheng builds a solid barrier through continuous innovation and strategic patenting. The Claudin18.2 nanobody, dual‑target strategy, and novel costimulatory domains solidify a competitive edge for next‑generation cell therapy.</p>
+                <p style="font-size: 0.75rem; color: #2f6b5e; background: #eaf9f3; display: inline-block; padding: 0.2rem 0.9rem; border-radius: 40px;">✔️ High‑value grants reinforcing global leadership</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategic recommendations -->
+    <div class="strategy-footer">
+        <div style="font-weight: 700; font-size: 0.9rem;">📌 Strategic Recommendations</div>
+        <ul>
+            <li>🔹 <strong>Sustain R&D momentum</strong> – As early platform patents mature, maintain a continuous pipeline of new filings.</li>
+            <li>🔹 <strong>Commercial focus</strong> – Increase product‑specific patent density for lead candidate CTD402 as it advances in clinical trials.</li>
+            <li>🔹 <strong>Global enforcement readiness</strong> – With 66.7% overseas filings, prepare FTO analyses and international IP management.</li>
+        </ul>
+    </div>
+    <div style="text-align: center; font-size: 0.7rem; color: #8b9ab0; margin-top: 1.8rem;">
+        Source: Bioheng patent portfolio analysis (216 unique families) | Legal status & tech distribution as of 2025, including Q1 2026 key grants.
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Annual trend 2017-2025
+        const years = ['2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'];
+        const apps = [7, 7, 7, 28, 73, 35, 30, 25, 4];
+        const trendChart = echarts.init(document.getElementById('trendChart'));
+        trendChart.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            grid: { top: 40, left: 50, right: 20, bottom: 20, containLabel: true },
+            xAxis: { type: 'category', data: years, axisLabel: { fontWeight: 500, rotate: 30 } },
+            yAxis: { type: 'value', name: 'Patent applications', nameLocation: 'middle', nameGap: 40 },
+            series: [{
+                data: apps,
+                type: 'line',
+                smooth: true,
+                lineStyle: { width: 3, color: '#2b7e6b', shadowBlur: 6 },
+                symbol: 'circle',
+                symbolSize: 8,
+                areaStyle: { opacity: 0.1, color: '#84ccb3' },
+                itemStyle: { color: '#1f6e5c' },
+                label: { show: true, position: 'top', fontWeight: 'bold' }
+            }]
+        });
+
+        // Legal status pie
+        const legalData = [
+            { name: 'Under Examination', value: 87 },
+            { name: 'Granted', value: 37 },
+            { name: 'Published/Substantive', value: 62 },
+            { name: 'Invalid/Rejected', value: 18 },
+            { name: 'Publicly Disclosed', value: 12 }
+        ];
+        const legalChart = echarts.init(document.getElementById('legalChart'));
+        legalChart.setOption({
+            tooltip: { trigger: 'item' },
+            legend: { orient: 'vertical', left: 'left', textStyle: { fontSize: 11 } },
+            series: [{
+                type: 'pie', radius: '55%', center: ['50%', '55%'],
+                data: legalData,
+                label: { show: true, formatter: '{b}: {d}%', fontSize: 11 },
+                color: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#94a3b8']
+            }]
+        });
+
+        // Tech landscape (total 216)
+        const techData = [
+            { name: 'Other technical fields', value: 88 },
+            { name: 'Immune cell technology', value: 50 },
+            { name: 'CAR-T cell therapy', value: 33 },
+            { name: 'Antibody technology', value: 25 },
+            { name: 'Gene editing', value: 9 },
+            { name: 'Other / unclassified', value: 11 }
+        ];
+        const techChart = echarts.init(document.getElementById('techChart'));
+        techChart.setOption({
+            tooltip: { trigger: 'item' },
+            legend: { orient: 'vertical', left: 'left', textStyle: { fontSize: 10 } },
+            series: [{
+                type: 'pie', radius: ['40%', '70%'], data: techData,
+                label: { show: true, formatter: '{b}\n{d}%', fontSize: 10 },
+                color: ['#5470c6', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#9a60b4']
+            }]
+        });
+
+        // Product correlation
+        const productData = [
+            { name: 'Platform / General tech', value: 188 },
+            { name: 'CTD402 (CD7 UCAR-T)', value: 11 },
+            { name: 'Universal CAR-T platform', value: 9 },
+            { name: 'CD19/BCMA CAR-T', value: 6 }
+        ];
+        const productChart = echarts.init(document.getElementById('productChart'));
+        productChart.setOption({
+            tooltip: { trigger: 'item' },
+            legend: { orient: 'vertical', left: 'left', textStyle: { fontSize: 10 } },
+            series: [{
+                type: 'pie', radius: '55%', data: productData,
+                label: { show: true, formatter: '{b}: {d}%', fontSize: 11 },
+                color: ['#3b82f6', '#f97316', '#8b5cf6', '#ec489a']
+            }]
+        });
+
+        // Global strategy
+        const globalData = [
+            { name: 'Direct overseas filings', value: 144 },
+            { name: 'PCT applications', value: 72 }
+        ];
+        const globalChart = echarts.init(document.getElementById('globalChart'));
+        globalChart.setOption({
+            tooltip: { trigger: 'item' },
+            legend: { orient: 'horizontal', bottom: 0, left: 'center' },
+            series: [{
+                type: 'pie', radius: ['45%', '70%'], data: globalData,
+                label: { show: true, formatter: '{b}\n{d}%', fontSize: 11 },
+                color: ['#2c6e9e', '#50b5b0']
+            }]
+        });
+
+        // Claims ring (>50 claims vs ≤50)
+        const claimsRing = [
+            { name: 'Claims > 50', value: 62.04 },
+            { name: 'Claims ≤ 50', value: 37.96 }
+        ];
+        const claimsChart = echarts.init(document.getElementById('claimsChart'));
+        claimsChart.setOption({
+            tooltip: { trigger: 'item', formatter: '{b}: {d}%' },
+            series: [{
+                type: 'pie', radius: ['55%', '80%'], avoidLabelOverlap: false,
+                label: { show: true, formatter: '{b}\n{d}%', fontSize: 11, fontWeight: 'bold' },
+                data: claimsRing, color: ['#2b7e6b', '#e2e8f0']
+            }]
+        });
+
+        window.addEventListener('resize', () => {
+            trendChart.resize();
+            legalChart.resize();
+            techChart.resize();
+            productChart.resize();
+            globalChart.resize();
+            claimsChart.resize();
+        });
+    })();
+</script>
+</body>
+</html>
